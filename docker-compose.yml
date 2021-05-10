@@ -27,7 +27,8 @@ services:
       
     networks:
       - elk
-###### kibana ####
+
+### kibana ###
   kibana:
     build:
       context: ./environment/kibana
@@ -54,7 +55,7 @@ services:
     environment:
       - HOST:${HOST}
     
-  ##### logstash ###
+  ### logstash ###
   logstash:
     build:
       context: ./environment/logstash/
@@ -98,7 +99,7 @@ services:
     depends_on:
       - elasticsearch  
 
-      # filebeat
+  ### filebeat ###
   filebeat:
     build:
       context: ./environment/filebeat
