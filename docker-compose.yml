@@ -4,7 +4,7 @@ services:
   ### elasticsearch ###
   elasticsearch:
     build:
-      context: ./envs/elasticsearch
+      context: ./environment/elasticsearch
       dockerfile: Dockerfile
       args: 
         ELK_VERSION: ${ELK_VERSION}
@@ -13,7 +13,7 @@ services:
 
     volumes:
       - type: bind
-        source: ./envs/elasticsearch/config/elasticsearch.yml
+        source: ./environment/elasticsearch/config/elasticsearch.yml
         target: /usr/share/elasticsearch/config/elasticsearch.yml
         read_only: true
 
@@ -30,7 +30,7 @@ services:
 ###### kibana ####
   kibana:
     build:
-      context: ./envs/kibana
+      context: ./environment/kibana
       dockerfile: Dockerfile
       args: 
         ELK_VERSION: $ELK_VERSION
@@ -39,7 +39,7 @@ services:
     
     volumes:
       - type: bind
-        source: ./envs/kibana/config/kibana.yml
+        source: ./environment/kibana/config/kibana.yml
         target: /usr/share/kibana/config/kibana.yml
 
     ports:
@@ -57,26 +57,26 @@ services:
   ##### logstash ###
   logstash:
     build:
-      context: ./envs/logstash/
+      context: ./environment/logstash/
       dockerfile: Dockerfile
       args:
         ELK_VERSION: $ELK_VERSION
     
     volumes:    
       - type: bind
-        source: ./envs/logstash/config/logstash.conf
+        source: ./environment/logstash/config/logstash.conf
         target: /usr/share/logstash/config/logstash.conf      
       
       - type: bind
-        source: ./envs/logstash/config/logstash.yml
+        source: ./environment/logstash/config/logstash.yml
         target: /usr/share/logstash/config/logstash.yml      
 
       - type: bind
-        source: ./envs/logstash/config/pipelines.yml
+        source: ./environment/logstash/config/pipelines.yml
         target: /usr/share/logstash/config/pipelines.yml
       
       - type: bind
-        source: ./envs/logstash/mysql-connector/mysql-connector-java-8.0.23.jar        
+        source: ./environment/logstash/mysql-connector/mysql-connector-java-8.0.23.jar        
         target: /usr/share/logstash/mysql-connector-java-8.0.23.jar      
       
     ports:
@@ -101,7 +101,7 @@ services:
       # filebeat
   filebeat:
     build:
-      context: ./envs/filebeat
+      context: ./environment/filebeat
       dockerfile: Dockerfile
       args: 
         ELK_VERSION: $ELK_VERSION
