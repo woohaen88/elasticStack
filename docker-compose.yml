@@ -1,0 +1,122 @@
+version: '3.2'
+
+services:
+  ### elasticsearch ###
+  elasticsearch:
+    build:
+      context: ./envs/elasticsearch
+      dockerfile: Dockerfile
+      args: 
+        ELK_VERSION: ${ELK_VERSION}
+
+    privileged: true
+
+    volumes:
+      - type: bind
+        source: ./envs/elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"      
+      HOST: $HOST
+      
+    networks:
+      - elk
+###### kibana ####
+  kibana:
+    build:
+      context: ./envs/kibana
+      dockerfile: Dockerfile
+      args: 
+        ELK_VERSION: $ELK_VERSION
+    
+    privileged: true
+    
+    volumes:
+      - type: bind
+        source: ./envs/kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+
+    ports:
+      - "5601:5601"
+
+    networks:
+      - elk
+
+    depends_on:
+      - elasticsearch
+
+    environment:
+      - HOST:${HOST}
+    
+  ##### logstash ###
+  logstash:
+    build:
+      context: ./envs/logstash/
+      dockerfile: Dockerfile
+      args:
+        ELK_VERSION: $ELK_VERSION
+    
+    volumes:    
+      - type: bind
+        source: ./envs/logstash/config/logstash.conf
+        target: /usr/share/logstash/config/logstash.conf      
+      
+      - type: bind
+        source: ./envs/logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml      
+
+      - type: bind
+        source: ./envs/logstash/config/pipelines.yml
+        target: /usr/share/logstash/config/pipelines.yml
+      
+      - type: bind
+        source: ./envs/logstash/mysql-connector/mysql-connector-java-8.0.23.jar        
+        target: /usr/share/logstash/mysql-connector-java-8.0.23.jar      
+      
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      HOST: ${HOST}
+
+    env_file: 
+      - .env
+
+    networks:
+      - elk
+
+    depends_on:
+      - elasticsearch  
+
+      # filebeat
+  filebeat:
+    build:
+      context: ./envs/filebeat
+      dockerfile: Dockerfile
+      args: 
+        ELK_VERSION: $ELK_VERSION
+    
+    privileged: true
+
+    networks:
+      - elk
+
+    depends_on:
+      - elasticsearch
+
+    environment:
+      HOST: ${HOST}      
+    
+networks:
+   elk:
+     driver: bridge
